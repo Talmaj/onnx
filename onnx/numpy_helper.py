@@ -32,7 +32,8 @@ def to_array(tensor):  # type: (TensorProto) -> np.ndarray[Any]
         raise TypeError("The element type in the input tensor is not defined.")
     elif tensor.data_type == TensorProto.ISO_IEC_15938_17:
         dec = deepCABAC.Decoder()
-        t = dec.getStream(tensor.raw_data).decodeWeights()
+        dec.getStream(np.frombuffer(tensor.raw_data, dtype=np.uint8))
+        t = dec.decodeWeights()
         dec.finish()
         return t.reshape(tensor.dims)
 

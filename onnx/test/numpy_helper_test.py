@@ -3,9 +3,11 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import deepCABAC
 import numpy as np  # type: ignore
 
 from onnx import numpy_helper
+from onnx import TensorProto
 
 import unittest
 
@@ -73,6 +75,23 @@ class TestNumpyHelper(unittest.TestCase):
 
     def test_complex128(self):  # type: () -> None
         self._test_numpy_helper_float_type(np.complex128)
+
+    def test_ISO_IEC_15938_17(self):
+        stepsize = 2**(-0.5*15)
+        arr = np.random.rand(13, 37).astype(np.float32)
+        encoder = deepCABAC.Encoder()
+        encoder.encodeWeightsRD(arr, 0.1, stepsize, 0.001)
+        a_enc = encoder.finish().tobytes()
+
+        # form onnx tensor
+        tensor = TensorProto()
+        tensor.dims.extend(arr.shape)
+        tensor.data_type = TensorProto.ISO_IEC_15938_17
+        tensor.raw_data = a_enc
+
+        arr_quant = (arr / stepsize).round() * stepsize
+        arr_rec = numpy_helper.to_array(tensor)
+        np.testing.assert_equal(arr_quant, arr_rec)
 
 
 if __name__ == '__main__':
