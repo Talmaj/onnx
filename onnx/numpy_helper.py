@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import sys
 
+import deepCABAC
 import numpy as np  # type: ignore
 from onnx import TensorProto
 from onnx import mapping
@@ -29,6 +30,11 @@ def to_array(tensor):  # type: (TensorProto) -> np.ndarray[Any]
             "Currently not supporting loading segments.")
     if tensor.data_type == TensorProto.UNDEFINED:
         raise TypeError("The element type in the input tensor is not defined.")
+    elif tensor.data_type == TensorProto.ISO_IEC_15938_17:
+        dec = deepCABAC.Decoder()
+        t = dec.getStream(tensor.raw_data).decodeWeights()
+        dec.finish()
+        return t.reshape(tensor.dims)
 
     tensor_dtype = tensor.data_type
     np_dtype = mapping.TENSOR_TYPE_TO_NP_TYPE[tensor_dtype]
