@@ -80,7 +80,7 @@ class TestNumpyHelper(unittest.TestCase):
         stepsize = 2**(-0.5*15)
         arr = np.random.rand(13, 37).astype(np.float32)
         encoder = deepCABAC.Encoder()
-        encoder.encodeWeightsRD(arr, 0.1, stepsize, 0.001)
+        encoder.encodeWeightsRD(arr, 0.1, stepsize, 0.)
         a_enc = encoder.finish().tobytes()
 
         # form onnx tensor
